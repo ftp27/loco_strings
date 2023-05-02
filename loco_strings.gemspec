@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable Layout/LineLength
+
 require_relative "lib/loco_strings/version"
 
 Gem::Specification.new do |spec|
@@ -34,3 +36,5 @@ Gem::Specification.new do |spec|
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
 end
+
+# rubocop:enable Layout/LineLength

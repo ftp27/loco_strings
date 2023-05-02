@@ -5,7 +5,7 @@ source "https://rubygems.org"
 # Specify your gem's dependencies in loco_strings.gemspec
 gemspec
 
-gem 'nokogiri', '~> 1.14', '>= 1.14.3'
+gem "nokogiri", "~> 1.14", ">= 1.14.3"
 
 gem "rake", "~> 13.0"
 

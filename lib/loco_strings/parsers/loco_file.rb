@@ -1,24 +1,25 @@
+# frozen_string_literal: true
+
 module LocoStrings
-  class LocoFile 
-    def initialize(file_path) 
+  # LocoFile is a class for working with localization strings.
+  class LocoFile
+    attr_reader :file_path
+
+    def initialize(file_path)
       @file_path = file_path
-      @strings = {}
+      clean
     end
 
     def read
       raise Error, "Not implemented"
     end
 
-    def write 
+    def write
       raise Error, "Not implemented"
     end
 
     def update_file_path(file_path)
       @file_path = file_path
-    end
-
-    def get_file_path
-      @file_path
     end
 
     def update(key, value, comment = nil)
@@ -31,6 +32,10 @@ module LocoStrings
 
     def value(key)
       @strings[key]
+    end
+
+    def clean
+      @strings = {}
     end
   end
 end
