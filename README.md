@@ -1,5 +1,7 @@
 # LocoStrings
 
+[![Gem Version](https://badge.fury.io/rb/loco_strings.svg)](https://badge.fury.io/rb/loco_strings)
+
 LocoStrings is a Ruby gem that provides utilities for working with localization strings in iOS and Android applications.
 
 If you're an iOS or Android developer, you know how important it is to properly localize your apps for different languages and regions. However, managing localization files can be a tedious and error-prone task, especially as your app grows and supports more languages.
