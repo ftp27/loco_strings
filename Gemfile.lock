@@ -1,7 +1,8 @@
 PATH
   remote: .
   specs:
-    loco_strings (0.1.0)
+    loco_strings (0.1.1)
+      nokogiri (~> 1.13, >= 1.13.8)
 
 GEM
   remote: https://rubygems.org/
