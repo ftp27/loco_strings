@@ -10,6 +10,27 @@ That's where LocoStrings comes in. With LocoStrings, you can easily parse and ma
 
 In this README, we'll show you how to install and use LocoStrings in your Ruby projects. Let's get started!
 
+### Supported formats
+
+Here is the list of currently supported files, as well as files that are still on the to-do list. I am still working on the library, and I hope to eventually finish all the files on the list. Contributions are welcome.
+
+- [x] Android Resources
+- [x] Apple Strings
+- [ ] Gettext
+- [ ] Java Properties
+- [ ] Apple XLIFF
+- [ ] Objective-C/Cocoa Properties
+- [ ] .NET Resources
+- [ ] JavaScript Object
+- [ ] React Native (I18n library)
+- [ ] Symphony PHP XLIFF
+- [ ] Angular i18n XLIFF
+- [ ] Ruby YAML
+- [ ] Salesforce Translation
+- [ ] QT Linguist
+- [ ] Docx
+- [ ] Flutter ARB file
+
 ## Installation
 
 Install the gem and add to the application's Gemfile by executing:
