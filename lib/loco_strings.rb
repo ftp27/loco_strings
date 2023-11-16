@@ -3,6 +3,7 @@
 require_relative "loco_strings/version"
 require_relative "loco_strings/parsers/android_file"
 require_relative "loco_strings/parsers/ios_file"
+require_relative "loco_strings/parsers/xcstrings_file"
 
 # LocoStrings is a Ruby gem for working with iOS and Android localization strings.
 module LocoStrings
@@ -14,15 +15,19 @@ module LocoStrings
     end
   end
 
-  def self.load(file_path)
+  def self.load(file_path, language = nil)
     ext = File.extname(file_path)
-    raise Error, "Unsupported file format: #{ext}" unless [".strings", ".xml"].include? ext
+    raise Error, "Unsupported file format: #{ext}" unless [".strings", ".xml", ".xcstrings"].include? ext
 
     case ext
     when ".strings"
       IosFile.new file_path
     when ".xml"
       AndroidFile.new file_path
+    when ".xcstrings"
+      raise Error, "Language is required for xcstrings files" unless language
+
+      XCStringsFile.new file_path, language
     else
       raise Error, "Not implemented"
     end

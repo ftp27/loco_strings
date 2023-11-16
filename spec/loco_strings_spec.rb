@@ -130,6 +130,95 @@ RSpec.describe LocoStrings do
       File.delete(test_path) if File.exist?(test_path)
     end
   end
+
+  describe "XCStringsFile" do
+    it "reads strings from a strings file" do
+      strings = LocoStrings.load("spec/test_files/Localizable.xcstrings", "en")
+      expect(strings.read).to eq(
+        "test_key_1" => LocoStrings::LocoString.new("test_key_1", "test_text_1"),
+        "test_key_2" => LocoStrings::LocoString.new("test_key_2", "test_key_2", "test comment for key 2"),
+        "test_key_3" => LocoStrings::LocoString.new("test_key_3", "test_text_3")
+      )
+    end
+    it "doesn't fail if file is doent exist" do
+      test_path = "spec/test_files/test.xcstrings"
+      File.delete(test_path) if File.exist?(test_path)
+      strings = LocoStrings.load(test_path, "en")
+      expect(strings.read).to eq({})
+    end
+    it "makes strings file" do
+      test_path = "spec/test_files/test.xcstrings"
+      File.delete(test_path) if File.exist?(test_path)
+      strings = LocoStrings.load(test_path, "en")
+      strings.update("test_key_1", "test_text_1")
+      strings.update("test_key_2", "test_key_2", "test comment for key 2")
+      strings.write
+      expect(File.exist?(test_path)).to be true
+      expected_value = <<~EXPECTED.strip
+        {
+          "sourceLanguage": "en",
+          "strings": {
+            "test_key_1": {
+              "localizations": {
+                "en": {
+                  "stringUnit": {
+                    "state": "translated",
+                    "value": "test_text_1"
+                  }
+                }
+              }
+            },
+            "test_key_2": {
+              "comment": "test comment for key 2"
+            }
+          },
+          "version": "1.0"
+        }
+      EXPECTED
+      expect(File.read(test_path)).to eq(expected_value)
+      File.delete(test_path) if File.exist?(test_path)
+    end
+    it "updates string in a file" do
+      test_path = "spec/test_files/test.xcstrings"
+      test_strings = "{\"sourceLanguage\": \"en\", \"strings\": {\"test_key_1\": {\"localizations\": {\"en\": {\"stringUnit\": {\"state\": \"translated\", \"value\": \"test_text_1\"}}}}, \"test_key_2\": {\"comment\": \"test comment for key 2\"}}, \"version\": \"1.0\"}"
+      File.open(test_path, "w") { |file| file.write(test_strings) }
+      strings = LocoStrings.load(test_path, "en")
+      strings.read
+      strings.update("test_key_2", "test_text_2_updated")
+      strings.write
+      expected_value = <<~EXPECTED.strip
+        {
+          "sourceLanguage": "en",
+          "strings": {
+            "test_key_1": {
+              "localizations": {
+                "en": {
+                  "stringUnit": {
+                    "state": "translated",
+                    "value": "test_text_1"
+                  }
+                }
+              }
+            },
+            "test_key_2": {
+              "comment": "test comment for key 2",
+              "localizations": {
+                "en": {
+                  "stringUnit": {
+                    "state": "translated",
+                    "value": "test_text_2_updated"
+                  }
+                }
+              }
+            }
+          },
+          "version": "1.0"
+        }
+      EXPECTED
+      expect(File.read(test_path)).to eq(expected_value)
+      File.delete(test_path) if File.exist?(test_path)
+    end
+  end
 end
 # rubocop:enable Layout/LineLength
 # rubocop:enable Metrics/BlockLength
