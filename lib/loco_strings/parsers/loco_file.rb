@@ -23,6 +23,9 @@ module LocoStrings
     end
 
     def update(key, value, comment = nil)
+      if comment.nil? && @strings.has_key?(key)
+        comment = @strings[key].comment 
+      end
       @strings[key] = LocoString.new key, value, comment
     end
 
