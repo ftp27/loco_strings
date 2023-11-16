@@ -13,9 +13,13 @@ module LocoStrings
     def initialize(key, value, comment = nil)
       super
     end
+
+    def to_s
+      "Key: #{key}, Value: #{value}, Comment: #{comment || "None"}"
+    end
   end
 
-  def self.load(file_path, language = nil)
+  def self.load(file_path)
     ext = File.extname(file_path)
     raise Error, "Unsupported file format: #{ext}" unless [".strings", ".xml", ".xcstrings"].include? ext
 
@@ -25,9 +29,7 @@ module LocoStrings
     when ".xml"
       AndroidFile.new file_path
     when ".xcstrings"
-      raise Error, "Language is required for xcstrings files" unless language
-
-      XCStringsFile.new file_path, language
+      XCStringsFile.new file_path
     else
       raise Error, "Not implemented"
     end

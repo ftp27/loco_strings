@@ -133,7 +133,7 @@ RSpec.describe LocoStrings do
 
   describe "XCStringsFile" do
     it "reads strings from a strings file" do
-      strings = LocoStrings.load("spec/test_files/Localizable.xcstrings", "en")
+      strings = LocoStrings.load("spec/test_files/Localizable.xcstrings")
       expect(strings.read).to eq(
         "test_key_1" => LocoStrings::LocoString.new("test_key_1", "test_text_1"),
         "test_key_2" => LocoStrings::LocoString.new("test_key_2", "test_key_2", "test comment for key 2"),
@@ -143,15 +143,17 @@ RSpec.describe LocoStrings do
     it "doesn't fail if file is doent exist" do
       test_path = "spec/test_files/test.xcstrings"
       File.delete(test_path) if File.exist?(test_path)
-      strings = LocoStrings.load(test_path, "en")
+      strings = LocoStrings.load(test_path)
       expect(strings.read).to eq({})
     end
     it "makes strings file" do
       test_path = "spec/test_files/test.xcstrings"
       File.delete(test_path) if File.exist?(test_path)
-      strings = LocoStrings.load(test_path, "en")
+      strings = LocoStrings.load(test_path)
+      strings.set_language("en")
       strings.update("test_key_1", "test_text_1")
       strings.update("test_key_2", "test_key_2", "test comment for key 2")
+      strings.update("test_key_3", "test_text_3", nil, "es")
       strings.write
       expect(File.exist?(test_path)).to be true
       expected_value = <<~EXPECTED.strip
@@ -170,6 +172,16 @@ RSpec.describe LocoStrings do
             },
             "test_key_2": {
               "comment": "test comment for key 2"
+            },
+            "test_key_3": {
+              "localizations": {
+                "es": {
+                  "stringUnit": {
+                    "state": "translated",
+                    "value": "test_text_3"
+                  }
+                }
+              }
             }
           },
           "version": "1.0"
@@ -180,9 +192,43 @@ RSpec.describe LocoStrings do
     end
     it "updates string in a file" do
       test_path = "spec/test_files/test.xcstrings"
-      test_strings = "{\"sourceLanguage\": \"en\", \"strings\": {\"test_key_1\": {\"localizations\": {\"en\": {\"stringUnit\": {\"state\": \"translated\", \"value\": \"test_text_1\"}}}}, \"test_key_2\": {\"comment\": \"test comment for key 2\"}}, \"version\": \"1.0\"}"
+      test_strings = <<~XCSTRING.strip
+        {
+          "sourceLanguage": "en",
+          "strings": {
+            "test_key_1": {
+              "localizations": {
+                "en": {
+                  "stringUnit": {
+                    "state": "translated",
+                    "value": "test_text_1"
+                  }
+                },
+                "es": {
+                  "stringUnit": {
+                    "state": "translated",
+                    "value": "test_text_1_es"
+                  }
+                }
+              }
+            },
+            "test_key_2": {
+              "comment": "test comment for key 2",
+              "localizations": {
+                "en": {
+                  "stringUnit": {
+                    "state": "translated",
+                    "value": "test_text_2"
+                  }
+                }
+              }
+            }
+          },
+          "version": "1.0"
+        }
+      XCSTRING
       File.open(test_path, "w") { |file| file.write(test_strings) }
-      strings = LocoStrings.load(test_path, "en")
+      strings = LocoStrings.load(test_path)
       strings.read
       strings.update("test_key_2", "test_text_2_updated")
       strings.write
@@ -196,6 +242,12 @@ RSpec.describe LocoStrings do
                   "stringUnit": {
                     "state": "translated",
                     "value": "test_text_1"
+                  }
+                },
+                "es": {
+                  "stringUnit": {
+                    "state": "translated",
+                    "value": "test_text_1_es"
                   }
                 }
               }
