@@ -19,7 +19,7 @@ module LocoStrings
     end
   end
 
-  def self.load(file_path)
+  def self.load(file_path) # rubocop:disable Metrics/MethodLength
     ext = File.extname(file_path)
     raise Error, "Unsupported file format: #{ext}" unless [".strings", ".xml", ".xcstrings"].include? ext
 

@@ -25,7 +25,7 @@ module LocoStrings
         output += "/* #{value.comment} */\n" if value.comment
         output += "\"#{key}\" = \"#{value.value}\";\n"
       end
-      File.open(@file_path, "w") { |file| file.write(output) }
+      File.write(@file_path, output)
     end
 
     private

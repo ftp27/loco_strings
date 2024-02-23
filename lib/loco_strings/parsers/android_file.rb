@@ -29,7 +29,7 @@ module LocoStrings
           end
         end
       end
-      File.open(@file_path, "w") { |file| file.write(builder.to_xml) }
+      File.write(@file_path, builder.to_xml)
     end
 
     private

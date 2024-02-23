@@ -65,31 +65,31 @@ RSpec.describe LocoStrings do
     end
     it "doesn't fail if file is doent exist" do
       test_path = "spec/test_files/test.strings"
-      File.delete(test_path) if File.exist?(test_path)
+      FileUtils.rm_f(test_path)
       strings = LocoStrings.load(test_path)
       expect(strings.read).to eq({})
     end
     it "makes strings file" do
       test_path = "spec/test_files/test.strings"
-      File.delete(test_path) if File.exist?(test_path)
+      FileUtils.rm_f(test_path)
       strings = LocoStrings.load(test_path)
       strings.update("test_key_1", "test_text_1")
       strings.update("test_key_2", "test_text_2", "test comment for key 2")
       strings.write
       expect(File.exist?(test_path)).to be true
       expect(File.read(test_path)).to eq("\"test_key_1\" = \"test_text_1\";\n/* test comment for key 2 */\n\"test_key_2\" = \"test_text_2\";\n")
-      File.delete(test_path) if File.exist?(test_path)
+      FileUtils.rm_f(test_path)
     end
     it "updates string in a file" do
       test_path = "spec/test_files/test.strings"
       test_strings = "\"test_key_1\" = \"test_text_1\";\n/* test comment for key 2 */\n\"test_key_2\" = \"test_text_2\";\n\"test_key_3\" = \"test_text_3\";\n"
-      File.open(test_path, "w") { |file| file.write(test_strings) }
+      File.write(test_path, test_strings)
       strings = LocoStrings.load(test_path)
       strings.read
       strings.update("test_key_1", "test_text_1_updated")
       strings.write
       expect(File.read(test_path)).to eq("\"test_key_1\" = \"test_text_1_updated\";\n/* test comment for key 2 */\n\"test_key_2\" = \"test_text_2\";\n\"test_key_3\" = \"test_text_3\";\n")
-      File.delete(test_path) if File.exist?(test_path)
+      FileUtils.rm_f(test_path)
     end
   end
 
@@ -103,31 +103,31 @@ RSpec.describe LocoStrings do
     end
     it "doesn't fail if file is doent exist" do
       test_path = "spec/test_files/test.xml"
-      File.delete(test_path) if File.exist?(test_path)
+      FileUtils.rm_f(test_path)
       strings = LocoStrings.load(test_path)
       expect(strings.read).to eq({})
     end
     it "makes strings file" do
       test_path = "spec/test_files/test.xml"
-      File.delete(test_path) if File.exist?(test_path)
+      FileUtils.rm_f(test_path)
       strings = LocoStrings.load(test_path)
       strings.update("test_key_1", "test_text_1")
       strings.update("test_key_2", "test_text_2", "test comment for key 2")
       strings.write
       expect(File.exist?(test_path)).to be true
       expect(File.read(test_path)).to eq("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<resources>\n  <string name=\"test_key_1\">test_text_1</string>\n  <!--test comment for key 2-->\n  <string name=\"test_key_2\">test_text_2</string>\n</resources>\n")
-      File.delete(test_path) if File.exist?(test_path)
+      FileUtils.rm_f(test_path)
     end
     it "updates string in a file" do
       test_path = "spec/test_files/test.xml"
       test_strings = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<resources>\n  <string name=\"test_key_1\">test_text_1</string>\n  <!--test comment for key 2-->\n  <string name=\"test_key_2\">test_text_2</string>\n  <string name=\"test_key_3\">test_text_3</string>\n</resources>\n"
-      File.open(test_path, "w") { |file| file.write(test_strings) }
+      File.write(test_path, test_strings)
       strings = LocoStrings.load(test_path)
       strings.read
       strings.update("test_key_1", "test_text_1_updated")
       strings.write
       expect(File.read(test_path)).to eq("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<resources>\n  <string name=\"test_key_1\">test_text_1_updated</string>\n  <!--test comment for key 2-->\n  <string name=\"test_key_2\">test_text_2</string>\n  <string name=\"test_key_3\">test_text_3</string>\n</resources>\n")
-      File.delete(test_path) if File.exist?(test_path)
+      FileUtils.rm_f(test_path)
     end
   end
 
@@ -142,15 +142,15 @@ RSpec.describe LocoStrings do
     end
     it "doesn't fail if file is doent exist" do
       test_path = "spec/test_files/test.xcstrings"
-      File.delete(test_path) if File.exist?(test_path)
+      FileUtils.rm_f(test_path)
       strings = LocoStrings.load(test_path)
       expect(strings.read).to eq({})
     end
     it "makes strings file" do
       test_path = "spec/test_files/test.xcstrings"
-      File.delete(test_path) if File.exist?(test_path)
+      FileUtils.rm_f(test_path)
       strings = LocoStrings.load(test_path)
-      strings.set_language("en")
+      strings.select_language("en")
       strings.update("test_key_1", "test_text_1")
       strings.update("test_key_2", "test_key_2", "test comment for key 2")
       strings.update("test_key_3", "test_text_3", nil, "es")
@@ -188,7 +188,7 @@ RSpec.describe LocoStrings do
         }
       EXPECTED
       expect(File.read(test_path)).to eq(expected_value)
-      File.delete(test_path) if File.exist?(test_path)
+      FileUtils.rm_f(test_path)
     end
     it "updates string in a file" do
       test_path = "spec/test_files/test.xcstrings"
@@ -227,7 +227,7 @@ RSpec.describe LocoStrings do
           "version": "1.0"
         }
       XCSTRING
-      File.open(test_path, "w") { |file| file.write(test_strings) }
+      File.write(test_path, test_strings)
       strings = LocoStrings.load(test_path)
       strings.read
       strings.update("test_key_2", "test_text_2_updated")
@@ -268,7 +268,7 @@ RSpec.describe LocoStrings do
         }
       EXPECTED
       expect(File.read(test_path)).to eq(expected_value)
-      File.delete(test_path) if File.exist?(test_path)
+      FileUtils.rm_f(test_path)
     end
   end
 end
