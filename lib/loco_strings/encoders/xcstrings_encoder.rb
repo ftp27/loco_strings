@@ -17,44 +17,67 @@ module LocoStrings
     def encode
       raise Error, "The base language is not defined" if @language.nil?
 
-      json = {}
-      json["sourceLanguage"] = @language
-      json["strings"] = {}
-      @strings.each do |key, value|
-        json["strings"][key] = encode_row(key, value)
+      json = {
+        "sourceLanguage" => @language,
+        "strings" => {},
+        "version" => "1.0"
+      }
+      generate_keys.each do |key|
+        json["strings"][key] = encode_key(key)
       end
-      json["version"] = "1.0"
-      JSON.pretty_generate(json)
+      JSON.pretty_generate(json, { space_before: " " })
     end
 
     private
 
-    def encode_row(key, value)
+    def generate_keys
+      keys = []
+      @translations.each do |_, translation|
+        keys += translation.keys
+      end
+      keys.uniq
+    end
+
+    def encode_key(key)
       row = {}
-      row["comment"] = value.comment unless value.comment.nil?
-      localizations = encode_localizations(key, value)
-      row["localizations"] = localizations unless localizations.empty?
+      @translations.each do |language, translation|
+        next unless translation.key?(key)
+
+        value = translation[key]
+        next if value.nil?
+
+        row["comment"] = value.comment unless row.key?("comment") || value.comment.nil?
+        row["localizations"] ||= {}
+        row["localizations"][language] = encode_value(value)
+      end
       row
     end
 
-    def encode_localizations(key, value)
-      localizations = {}
-      localizations[@language] = encode_row_language(value.value) if should_encode_localization?(value.value, key)
-      @languages.each do |language|
-        next if language == @language
-        next unless should_encode_localization?(@translations[language][key], key)
-
-        localizations[language] = encode_row_language(@translations[language][key])
+    def encode_value(value)
+      if value.is_a?(LocoVariantions)
+        encode_variations(value)
+      else
+        encode_string_unit(value)
       end
-      localizations
     end
 
-    def should_encode_localization?(value, key)
-      value != key && !value.nil?
+    def encode_string_unit(unit)
+      res = { "stringUnit" => {} }
+      res["stringUnit"]["state"] = unit.state unless unit.state.nil?
+      res["stringUnit"]["value"] = unit.value
+      res
     end
 
-    def encode_row_language(value)
-      { "stringUnit" => { "state" => "translated", "value" => value } }
+    def encode_variations(variations)
+      plural = {}
+      variations.strings.each do |key, string|
+        plural[key] = encode_string_unit(string) unless string.nil?
+      end
+      {
+        "variations" => {
+          "plural" => plural
+        }
+      }
     end
   end
 end

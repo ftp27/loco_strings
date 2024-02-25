@@ -43,26 +43,63 @@ module LocoStrings
     def decode_strings(json)
       strings = json["strings"]
       strings.each do |key, value|
-        decode_string(key, value)
+        @strings[key] = decode_string(key, value, @language)
         decode_translations(key, value)
       end
     end
 
-    def decode_string(key, value)
-      comment = value["comment"]
-      translation = key
-      loc = value.dig("localizations", @language)
-      translation = loc.dig("stringUnit", "value") unless loc.nil?
-      @strings[key] = LocoString.new(key, translation, comment) unless translation.nil?
+    def decode_string(key, value, language)
+      return LocoString.new(key, key, value["comment"], "new") unless value.key?("localizations")
+
+      loc = value.dig("localizations", language)
+      return if loc.nil?
+
+      if loc.key?("stringUnit")
+        decode_string_unit(key, loc, value["comment"])
+      elsif loc.key?("variations")
+        decode_variations(key, loc, value["comment"])
+      else
+        LocoString.new(key, key, value["comment"], "new")
+      end
+    end
+
+    def decode_string_unit(key, value, comment)
+      return nil unless value.key?("stringUnit")
+
+      unit = value["stringUnit"]
+      translation = unit["value"]
+      LocoString.new(key, translation, comment, unit["state"]) unless translation.nil?
+    end
+
+    def decode_variations(key, value, comment)
+      variations = value["variations"]
+      plural = decode_plural(variations, comment)
+      return nil if plural.empty?
+
+      variation = LocoVariantions.new(key, comment)
+      plural.each do |unit|
+        variation.append_string(unit)
+      end
+      variation
+    end
+
+    def decode_plural(variation, comment)
+      plural = variation["plural"]
+      return [] if plural.nil?
+
+      result = []
+      plural.each do |key, value|
+        unit = decode_string_unit(key, value, comment)
+        result << unit unless unit.nil?
+      end
+      result
     end
 
     def decode_translations(key, value)
       @languages.each do |language|
-        next unless value.dig("localizations", language, "stringUnit", "value")
-
-        translation = value.dig("localizations", language, "stringUnit", "value")
+        string = decode_string(key, value, language)
         @translations[language] ||= {}
-        @translations[language][key] = translation
+        @translations[language][key] = string
       end
     end
   end

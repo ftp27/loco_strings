@@ -29,14 +29,27 @@ module LocoStrings
       File.write(@file_path, json)
     end
 
-    def update(key, value, comment = nil, language = @language)
+    def update(key, value, comment = nil, stage = nil, language = @language)
       raise Error, "The base language is not defined" if @language.nil?
 
-      if @language == language
-        update_with_same_language(key, value, comment)
-      else
-        update_with_different_language(key, value, comment, language)
-      end
+      stage = "translated" if stage.nil?
+      string = make_strings(key, value, comment, stage, language)
+      return if string.nil?
+
+      @translations[language] ||= {}
+      @translations[language][key] = string
+      @strings[key] = string if @language == language
+    end
+
+    def update_variation(key, variant, strings, comment = nil, state = nil, language = @language) # rubocop:disable Metrics/ParameterLists
+      raise Error, "The base language is not defined" if @language.nil?
+
+      variations = make_variations(key, variant, strings, comment, state, language)
+      return if variations.nil?
+
+      @translations[language] ||= {}
+      @translations[language][key] = variations
+      @strings[key] = variations if @language == language
     end
 
     def select_language(language)
@@ -65,17 +78,30 @@ module LocoStrings
 
     private
 
-    def update_with_different_language(key, value, comment, language)
-      @languages << language unless @languages.include?(language)
-      @translations[language] ||= {}
-      @translations[language][key] = value
-      @strings[key] ||= LocoString.new(key, key, comment)
+    def make_strings(key, value, comment = nil, state = nil, language = @language)
+      unit = @translations.dig(language, key)
+      return LocoString.new(key, value, comment, state) if unit.nil?
+
+      if unit.is_a?(LocoVariantions)
+        puts "Variations not supported through this method"
+        return nil
+      end
+      unit.update(value, comment, state)
+      unit
     end
 
-    def update_with_same_language(key, value, comment)
-      existing_comment = @strings[key]&.comment
-      comment ||= existing_comment if existing_comment && @strings.key?(key)
-      @strings[key] = LocoString.new(key, value, comment)
+    def make_variations(key, variant, value, comment = nil, state = nil, language = @language) # rubocop:disable Metrics/ParameterLists
+      variants = @translations.dig(language, key)
+
+      return make_strings(key, value, comment, state, language) if variants.is_a?(LocoString)
+
+      if variants.nil?
+        state = "new" if state.nil?
+        return LocoVariantions.new(key, { variant => LocoString.new(variant, value, comment, state) })
+      end
+
+      variants.update_variant(variant, value, comment, state)
+      variants
     end
   end
 end

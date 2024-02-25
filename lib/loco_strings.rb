@@ -9,13 +9,42 @@ require_relative "loco_strings/parsers/xcstrings_file"
 module LocoStrings
   class Error < StandardError; end
 
-  LocoString = Struct.new(:key, :value, :comment) do
-    def initialize(key, value, comment = nil)
+  LocoString = Struct.new(:key, :value, :comment, :state) do
+    def initialize(key, value, comment = nil, state = nil)
       super
     end
 
+    def update(value, comment = nil, state = nil)
+      self.value = value
+      self.comment = comment unless comment.nil?
+      self.state = state
+    end
+
     def to_s
-      "Key: #{key}, Value: #{value}, Comment: #{comment || "None"}"
+      "Key: #{key}, Value: #{value}, Comment: #{comment || "None"}, State: #{state || "None"}"
+    end
+  end
+
+  LocoVariantions = Struct.new(:key, :strings, :comment) do
+    def initialize(key, strings = nil, comment = nil)
+      super
+      self.strings = strings || {}
+    end
+
+    def append_string(string)
+      strings[string.key] = string
+    end
+
+    def update_variant(key, value, comment = nil, state = nil)
+      if strings.key? key
+        strings[key].update(value, comment, state)
+      else
+        strings[key] = LocoString.new(key, value, comment, state)
+      end
+    end
+
+    def to_s
+      "Key: #{key}, Strings: #{strings}, Comment: #{comment || "None"}"
     end
   end
 

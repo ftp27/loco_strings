@@ -135,9 +135,16 @@ RSpec.describe LocoStrings do
     it "reads strings from a strings file" do
       strings = LocoStrings.load("spec/test_files/Localizable.xcstrings")
       expect(strings.read).to eq(
-        "test_key_1" => LocoStrings::LocoString.new("test_key_1", "test_text_1"),
-        "test_key_2" => LocoStrings::LocoString.new("test_key_2", "test_key_2", "test comment for key 2"),
-        "test_key_3" => LocoStrings::LocoString.new("test_key_3", "test_text_3")
+        "test_key_1" => LocoStrings::LocoString.new("test_key_1", "test_text_1", nil, "translated"),
+        "test_key_2" => LocoStrings::LocoString.new("test_key_2", "test_key_2", "test comment for key 2", "new"),
+        "test_key_3" => LocoStrings::LocoString.new("test_key_3", "test_text_3", nil, "new"),
+        "%lld coins" => LocoStrings::LocoVariantions.new(
+          "%lld coins",
+          {
+            "one" => LocoStrings::LocoString.new("one", "%lld coin", nil, "translated"),
+            "other" => LocoStrings::LocoString.new("other", "%lld coins", nil, "new")
+          }
+        )
       )
     end
     it "doesn't fail if file is doent exist" do
@@ -153,38 +160,46 @@ RSpec.describe LocoStrings do
       strings.select_language("en")
       strings.update("test_key_1", "test_text_1")
       strings.update("test_key_2", "test_key_2", "test comment for key 2")
-      strings.update("test_key_3", "test_text_3", nil, "es")
+      strings.update("test_key_3", "test_text_3", nil, nil, "es")
       strings.write
       expect(File.exist?(test_path)).to be true
       expected_value = <<~EXPECTED.strip
         {
-          "sourceLanguage": "en",
-          "strings": {
-            "test_key_1": {
-              "localizations": {
-                "en": {
-                  "stringUnit": {
-                    "state": "translated",
-                    "value": "test_text_1"
+          "sourceLanguage" : "en",
+          "strings" : {
+            "test_key_1" : {
+              "localizations" : {
+                "en" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_text_1"
                   }
                 }
               }
             },
-            "test_key_2": {
-              "comment": "test comment for key 2"
+            "test_key_2" : {
+              "comment" : "test comment for key 2",
+              "localizations" : {
+                "en" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_key_2"
+                  }
+                }
+              }
             },
-            "test_key_3": {
-              "localizations": {
-                "es": {
-                  "stringUnit": {
-                    "state": "translated",
-                    "value": "test_text_3"
+            "test_key_3" : {
+              "localizations" : {
+                "es" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_text_3"
                   }
                 }
               }
             }
           },
-          "version": "1.0"
+          "version" : "1.0"
         }
       EXPECTED
       expect(File.read(test_path)).to eq(expected_value)
@@ -194,37 +209,37 @@ RSpec.describe LocoStrings do
       test_path = "spec/test_files/test.xcstrings"
       test_strings = <<~XCSTRING.strip
         {
-          "sourceLanguage": "en",
-          "strings": {
-            "test_key_1": {
-              "localizations": {
-                "en": {
-                  "stringUnit": {
-                    "state": "translated",
-                    "value": "test_text_1"
+          "sourceLanguage" : "en",
+          "strings" : {
+            "test_key_1" : {
+              "localizations" : {
+                "en" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_text_1"
                   }
                 },
-                "es": {
-                  "stringUnit": {
-                    "state": "translated",
-                    "value": "test_text_1_es"
+                "es" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_text_1_es"
                   }
                 }
               }
             },
-            "test_key_2": {
+            "test_key_2" : {
               "comment": "test comment for key 2",
-              "localizations": {
-                "en": {
-                  "stringUnit": {
-                    "state": "translated",
-                    "value": "test_text_2"
+              "localizations" : {
+                "en" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_text_2"
                   }
                 }
               }
             }
           },
-          "version": "1.0"
+          "version" : "1.0"
         }
       XCSTRING
       File.write(test_path, test_strings)
@@ -234,37 +249,107 @@ RSpec.describe LocoStrings do
       strings.write
       expected_value = <<~EXPECTED.strip
         {
-          "sourceLanguage": "en",
-          "strings": {
-            "test_key_1": {
-              "localizations": {
-                "en": {
-                  "stringUnit": {
-                    "state": "translated",
-                    "value": "test_text_1"
+          "sourceLanguage" : "en",
+          "strings" : {
+            "test_key_1" : {
+              "localizations" : {
+                "en" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_text_1"
                   }
                 },
-                "es": {
-                  "stringUnit": {
-                    "state": "translated",
-                    "value": "test_text_1_es"
+                "es" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_text_1_es"
                   }
                 }
               }
             },
-            "test_key_2": {
-              "comment": "test comment for key 2",
-              "localizations": {
-                "en": {
-                  "stringUnit": {
-                    "state": "translated",
-                    "value": "test_text_2_updated"
+            "test_key_2" : {
+              "comment" : "test comment for key 2",
+              "localizations" : {
+                "en" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_text_2_updated"
                   }
                 }
               }
             }
           },
-          "version": "1.0"
+          "version" : "1.0"
+        }
+      EXPECTED
+      expect(File.read(test_path)).to eq(expected_value)
+      FileUtils.rm_f(test_path)
+    end
+    it "updates plural variations" do
+      test_path = "spec/test_files/test.xcstrings"
+      test_strings = <<~XCSTRING.strip
+        {
+          "sourceLanguage" : "en",
+          "strings" : {
+            "%lld coins" : {
+              "localizations" : {
+                "en" : {
+                  "variations" : {
+                    "plural" : {
+                      "one" : {
+                        "stringUnit" : {
+                          "state" : "translated",
+                          "value" : "%lld coin"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "version" : "1.0"
+        }
+      XCSTRING
+      File.write(test_path, test_strings)
+      strings = LocoStrings.load(test_path)
+      strings.read
+      strings.update_variation("%lld coins", "one", "%lld coin_updated", nil, "translated", "es")
+      strings.write
+      expected_value = <<~EXPECTED.strip
+        {
+          "sourceLanguage" : "en",
+          "strings" : {
+            "%lld coins" : {
+              "localizations" : {
+                "en" : {
+                  "variations" : {
+                    "plural" : {
+                      "one" : {
+                        "stringUnit" : {
+                          "state" : "translated",
+                          "value" : "%lld coin"
+                        }
+                      }
+                    }
+                  }
+                },
+                "es" : {
+                  "variations" : {
+                    "plural" : {
+                      "one" : {
+                        "stringUnit" : {
+                          "state" : "translated",
+                          "value" : "%lld coin_updated"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "version" : "1.0"
         }
       EXPECTED
       expect(File.read(test_path)).to eq(expected_value)
