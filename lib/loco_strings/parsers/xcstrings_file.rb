@@ -30,7 +30,7 @@ module LocoStrings
     end
 
     def update(key, value, comment = nil, stage = nil, language = @language)
-      raise Error, "The base language is not defined" if @language.nil?
+      raise Error, "The base language is not defined" if language.nil?
 
       stage = "translated" if stage.nil?
       string = make_strings(key, value, comment, stage, language)
@@ -42,7 +42,7 @@ module LocoStrings
     end
 
     def update_variation(key, variant, strings, comment = nil, state = nil, language = @language) # rubocop:disable Metrics/ParameterLists
-      raise Error, "The base language is not defined" if @language.nil?
+      raise Error, "The base language is not defined" if language.nil?
 
       variations = make_variations(key, variant, strings, comment, state, language)
       return if variations.nil?
@@ -56,6 +56,27 @@ module LocoStrings
       raise Error, "The base language is aready defined" unless @language.nil?
 
       @language = language
+    end
+
+    def value(key)
+      raise Error, "The base language is not defined" if @language.nil?
+
+      value_by_language(key, @language)
+    end
+
+    def value_by_language(key, language)
+      str = @translations.dig(language, key)
+      return nil if str.nil?
+
+      if str.is_a?(LocoString)
+        str.value
+      elsif str.is_a?(LocoVariantions)
+        str.strings.map { |_, v| v.value }
+      end
+    end
+
+    def unit(key, language = @language)
+      @translations.dig(language, key)
     end
 
     def to_s

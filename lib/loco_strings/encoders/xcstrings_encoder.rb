@@ -63,7 +63,11 @@ module LocoStrings
 
     def encode_string_unit(unit)
       res = { "stringUnit" => {} }
-      res["stringUnit"]["state"] = unit.state unless unit.state.nil?
+      res["stringUnit"]["state"] = if unit.state.nil?
+                                     "new"
+                                   else
+                                     unit.state
+                                   end
       res["stringUnit"]["value"] = unit.value
       res
     end

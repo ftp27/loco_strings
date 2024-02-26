@@ -43,13 +43,16 @@ module LocoStrings
     def decode_strings(json)
       strings = json["strings"]
       strings.each do |key, value|
-        @strings[key] = decode_string(key, value, @language)
+        val = decode_string(key, value, @language)
+        @strings[key] = val if val
+        @strings[key] = LocoString.new(key, key, value["comment"], "new") if val.nil?
+
         decode_translations(key, value)
       end
     end
 
     def decode_string(key, value, language)
-      return LocoString.new(key, key, value["comment"], "new") unless value.key?("localizations")
+      return unless value.key?("localizations")
 
       loc = value.dig("localizations", language)
       return if loc.nil?
@@ -58,8 +61,6 @@ module LocoStrings
         decode_string_unit(key, loc, value["comment"])
       elsif loc.key?("variations")
         decode_variations(key, loc, value["comment"])
-      else
-        LocoString.new(key, key, value["comment"], "new")
       end
     end
 
