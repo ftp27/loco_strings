@@ -40,17 +40,25 @@ module LocoStrings
 
     def encode_key(key)
       row = {}
-      @translations.each do |language, translation|
-        next unless translation.key?(key)
-
-        value = translation[key]
-        next if value.nil?
-
-        add_comment(row, value)
-        add_localization(row, language, value)
-        add_translation_flag(row, value)
+      sorted_keys.each do |language|
+        process_language(row, language, key)
       end
       row
+    end
+
+    def sorted_keys
+      @translations.keys.sort_by(&:to_s)
+    end
+
+    def process_language(row, language, key)
+      return unless @translations[language].key?(key)
+
+      value = @translations[language][key]
+      return if value.nil?
+
+      add_comment(row, value)
+      add_localization(row, language, value)
+      add_translation_flag(row, value)
     end
 
     def add_comment(row, value)

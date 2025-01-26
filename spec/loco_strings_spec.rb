@@ -358,6 +358,84 @@ RSpec.describe LocoStrings do
       expect(File.read(test_path)).to eq(expected_value)
       FileUtils.rm_f(test_path)
     end
+    it "checks locales order in encoded file" do
+      test_path = "spec/test_files/test.xcstrings"
+      FileUtils.rm_f(test_path)
+      strings = LocoStrings.load(test_path)
+      strings.select_language("en")
+      strings.update("test_key_1", "test_text_ar", nil, nil, "ar")
+      strings.update("test_key_1", "test_text_ru", nil, nil, "ru")
+      strings.update("test_key_1", "test_text_de", nil, nil, "de")
+      strings.update("test_key_1", "test_text_it", nil, nil, "it")
+      strings.update("test_key_1", "test_text_es", nil, nil, "es")
+      strings.update("test_key_1", "test_text_fr", nil, nil, "fr")
+      strings.update("test_key_1", "test_text_pt-BR", nil, nil, "pt-BR")
+      strings.update("test_key_1", "test_text_hi", nil, nil, "hi")
+      strings.write
+      expect(File.exist?(test_path)).to be true
+      expected_value = <<~EXPECTED.strip
+        {
+          "sourceLanguage" : "en",
+          "strings" : {
+            "test_key_1" : {
+              "localizations" : {
+                "ar" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_text_ar"
+                  }
+                },
+                "de" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_text_de"
+                  }
+                },
+                "es" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_text_es"
+                  }
+                },
+                "fr" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_text_fr"
+                  }
+                },
+                "hi" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_text_hi"
+                  }
+                },
+                "it" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_text_it"
+                  }
+                },
+                "pt-BR" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_text_pt-BR"
+                  }
+                },
+                "ru" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "test_text_ru"
+                  }
+                }
+              }
+            }
+          },
+          "version" : "1.0"
+        }
+      EXPECTED
+      expect(File.read(test_path)).to eq(expected_value)
+      FileUtils.rm_f(test_path)
+    end
   end
 end
 # rubocop:enable Layout/LineLength
