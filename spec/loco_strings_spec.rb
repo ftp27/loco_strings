@@ -134,10 +134,11 @@ RSpec.describe LocoStrings do
   describe "XCStringsFile" do
     it "reads strings from a strings file" do
       strings = LocoStrings.load("spec/test_files/Localizable.xcstrings")
-      expect(strings.read).to eq(
+      result = strings.read
+      expect(result).to eq(
         "test_key_1" => LocoStrings::LocoString.new("test_key_1", "test_text_1", nil, "translated"),
         "test_key_2" => LocoStrings::LocoString.new("test_key_2", "test_key_2", "test comment for key 2", "new"),
-        "test_key_3" => LocoStrings::LocoString.new("test_key_3", "test_text_3", nil, "new"),
+        "test_key_3" => LocoStrings::LocoString.new("test_key_3", "test_text_3", nil, "new", false),
         "%lld coins" => LocoStrings::LocoVariantions.new(
           "%lld coins",
           {
@@ -161,6 +162,7 @@ RSpec.describe LocoStrings do
       strings.update("test_key_1", "test_text_1")
       strings.update("test_key_2", "test_key_2", "test comment for key 2")
       strings.update("test_key_3", "test_text_3", nil, nil, "es")
+      strings.update_traslatability("test_key_1", false)
       strings.write
       expect(File.exist?(test_path)).to be true
       expected_value = <<~EXPECTED.strip
@@ -175,7 +177,8 @@ RSpec.describe LocoStrings do
                     "value" : "test_text_1"
                   }
                 }
-              }
+              },
+              "shouldTranslate" : false
             },
             "test_key_2" : {
               "comment" : "test comment for key 2",

@@ -43,9 +43,11 @@ module LocoStrings
     def decode_strings(json)
       strings = json["strings"]
       strings.each do |key, value|
+        translatable = value.fetch("shouldTranslate", true)
         val = decode_string(key, value, @language)
         @strings[key] = val if val
         @strings[key] = LocoString.new(key, key, value["comment"], "new") if val.nil?
+        @strings[key].translatable = translatable
 
         decode_translations(key, value)
       end
@@ -77,7 +79,7 @@ module LocoStrings
       plural = decode_plural(variations, comment)
       return nil if plural.empty?
 
-      variation = LocoVariantions.new(key, comment)
+      variation = LocoVariantions.new(key, nil, comment)
       plural.each do |unit|
         variation.append_string(unit)
       end

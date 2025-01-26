@@ -46,11 +46,24 @@ module LocoStrings
         value = translation[key]
         next if value.nil?
 
-        row["comment"] = value.comment unless row.key?("comment") || value.comment.nil?
-        row["localizations"] ||= {}
-        row["localizations"][language] = encode_value(value)
+        add_comment(row, value)
+        add_localization(row, language, value)
+        add_translation_flag(row, value)
       end
       row
+    end
+
+    def add_comment(row, value)
+      row["comment"] = value.comment unless row.key?("comment") || value.comment.nil?
+    end
+
+    def add_localization(row, language, value)
+      row["localizations"] ||= {}
+      row["localizations"][language] = encode_value(value)
+    end
+
+    def add_translation_flag(row, value)
+      row["shouldTranslate"] = false if value.translatable == false
     end
 
     def encode_value(value)

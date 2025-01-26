@@ -29,7 +29,8 @@
             "value" : "test_text_3"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "%lld coins" : {
       "localizations" : {

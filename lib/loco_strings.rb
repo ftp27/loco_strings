@@ -9,42 +9,54 @@ require_relative "loco_strings/parsers/xcstrings_file"
 module LocoStrings
   class Error < StandardError; end
 
-  LocoString = Struct.new(:key, :value, :comment, :state) do
-    def initialize(key, value, comment = nil, state = nil)
-      super
+  LocoString = Struct.new(:key, :value, :comment, :state, :translatable) do
+    def initialize(key, value, comment = nil, state = nil, translatable = nil)
+      translatable = true if translatable.nil?
+      super(key, value, comment, state, translatable)
     end
 
-    def update(value, comment = nil, state = nil)
+    def update(value, comment = nil, state = nil, translatable = nil)
       self.value = value
       self.comment = comment unless comment.nil?
       self.state = state
+      self.translatable = translatable unless translatable.nil?
     end
 
     def to_s
-      "Key: #{key}, Value: #{value}, Comment: #{comment || "None"}, State: #{state || "None"}"
+      if translatable
+        "Key: #{key}, Value: #{value}, Comment: #{comment || "None"}, " \
+          "State: #{state || "None"}"
+      else
+        "Key: #{key}, Value: #{value}, Comment: #{comment || "None"}, " \
+          "State: #{state || "None"}, Translatable: #{translatable}"
+      end
     end
   end
 
-  LocoVariantions = Struct.new(:key, :strings, :comment) do
-    def initialize(key, strings = nil, comment = nil)
-      super
-      self.strings = strings || {}
+  LocoVariantions = Struct.new(:key, :strings, :comment, :translatable) do
+    def initialize(key, strings = nil, comment = nil, translatable = nil)
+      super(key, strings || {}, comment, translatable || true)
     end
 
     def append_string(string)
       strings[string.key] = string
     end
 
-    def update_variant(key, value, comment = nil, state = nil)
+    def update_variant(key, value, comment = nil, state = nil, translatable = nil)
       if strings.key? key
-        strings[key].update(value, comment, state)
+        strings[key].update(value, comment, state, translatable)
       else
-        strings[key] = LocoString.new(key, value, comment, state)
+        strings[key] = LocoString.new(key, value, comment, state, nil, translatable)
       end
     end
 
     def to_s
-      "Key: #{key}, Strings: #{strings}, Comment: #{comment || "None"}"
+      if translatable
+        "Key: #{key}, Strings: #{strings}, Comment: #{comment || "None"}"
+      else
+        "Key: #{key}, Strings: #{strings}, Comment: #{comment || "None"}, " \
+          "Translatable: #{translatable}"
+      end
     end
   end
 

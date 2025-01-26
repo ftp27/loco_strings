@@ -52,6 +52,10 @@ module LocoStrings
       @strings[key] = variations if @language == language
     end
 
+    def update_traslatability(key, translatable)
+      @strings[key].translatable = translatable
+    end
+
     def select_language(language)
       raise Error, "The base language is aready defined" unless @language.nil?
 
