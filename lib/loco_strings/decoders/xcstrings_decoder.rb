@@ -51,7 +51,7 @@ module LocoStrings
         @strings[key] = LocoString.new(key, key, value["comment"], "new") if val.nil?
         @strings[key].translatable = translatable
 
-        decode_translations(key, value)
+        decode_translations(key, value, translatable)
       end
     end
 
@@ -100,9 +100,11 @@ module LocoStrings
       result
     end
 
-    def decode_translations(key, value)
+    def decode_translations(key, value, translatable = true)
       @languages.each do |language|
         string = decode_string(key, value, language)
+        # Carry the shouldTranslate flag onto the per-language unit so it round-trips on encode.
+        string.translatable = translatable if string
         @translations[language] ||= {}
         @translations[language][key] = string
       end

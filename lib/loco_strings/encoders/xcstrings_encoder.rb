@@ -44,6 +44,9 @@ module LocoStrings
       sorted_keys.each do |language|
         process_language(row, language, key)
       end
+      # Bare keys (no per-language unit, e.g. compiler-extracted source-only keys) have nothing for
+      # add_translation_flag to read — fall back to the source-string flag so shouldTranslate persists.
+      row["shouldTranslate"] = false if !row.key?("shouldTranslate") && @strings[key]&.translatable == false
       state = @extraction_states[key]
       return row if state.nil?
 

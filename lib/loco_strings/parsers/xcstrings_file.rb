@@ -55,6 +55,11 @@ module LocoStrings
 
     def update_traslatability(key, translatable)
       @strings[key].translatable = translatable
+      # The encoder reads the flag from the per-language units, so set it there too.
+      @translations.each_value do |units|
+        unit = units[key]
+        unit.translatable = translatable if unit
+      end
     end
 
     def select_language(language)
