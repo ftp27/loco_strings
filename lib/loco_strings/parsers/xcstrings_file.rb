@@ -120,7 +120,13 @@ module LocoStrings
     def make_variations(key, variant, value, comment = nil, state = nil, language = @language) # rubocop:disable Metrics/ParameterLists
       variants = @translations.dig(language, key)
 
-      return make_strings(key, value, comment, state, language) if variants.is_a?(LocoString)
+      # Upgrade a plain (e.g. compiler-extracted) flat string into a plural variation set the first
+      # time a variant is written for it — carrying over its comment. Without this, writing a
+      # variation onto an extracted key would silently fall back to a flat string and drop the plural.
+      if variants.is_a?(LocoString)
+        state = "new" if state.nil?
+        return LocoVariantions.new(key, { variant => LocoString.new(variant, value, comment, state) }, variants.comment)
+      end
 
       if variants.nil?
         state = "new" if state.nil?

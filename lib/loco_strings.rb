@@ -46,7 +46,7 @@ module LocoStrings
       if strings.key? key
         strings[key].update(value, comment, state, translatable)
       else
-        strings[key] = LocoString.new(key, value, comment, state, nil, translatable)
+        strings[key] = LocoString.new(key, value, comment, state, translatable)
       end
     end
 
