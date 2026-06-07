@@ -19,13 +19,14 @@ module LocoStrings
       @strings = decoder.strings
       @translations = decoder.translations
       @languages = decoder.languages
+      @extraction_states = decoder.extraction_states
       @strings
     end
 
     def write
       raise Error, "The base language is not defined" if @language.nil?
 
-      json = XCStringsEncoder.new(@strings, @translations, @languages, @language).encode
+      json = XCStringsEncoder.new(@strings, @translations, @languages, @language, @extraction_states || {}).encode
       File.write(@file_path, json)
     end
 
@@ -99,6 +100,7 @@ module LocoStrings
       @translations = {}
       @languages = []
       @language = nil
+      @extraction_states = {}
     end
 
     private

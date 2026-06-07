@@ -7,11 +7,12 @@ module LocoStrings
   class XCStringsEncoder
     attr_reader :language, :strings, :translations, :languages
 
-    def initialize(strings, translations, languages, language)
+    def initialize(strings, translations, languages, language, extraction_states = {})
       @strings = strings
       @translations = translations
       @languages = languages
       @language = language
+      @extraction_states = extraction_states || {}
     end
 
     def encode
@@ -43,7 +44,15 @@ module LocoStrings
       sorted_keys.each do |language|
         process_language(row, language, key)
       end
-      row
+      state = @extraction_states[key]
+      return row if state.nil?
+
+      # Keep Xcode's alphabetical field order: comment, extractionState, localizations, shouldTranslate.
+      ordered = {}
+      ordered["comment"] = row.delete("comment") if row.key?("comment")
+      ordered["extractionState"] = state
+      ordered.merge!(row)
+      ordered
     end
 
     def sorted_keys

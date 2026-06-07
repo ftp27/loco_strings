@@ -5,7 +5,7 @@ require "json"
 module LocoStrings
   # The XCStringsDecoder class is responsible for decoding the XCStrings file format.
   class XCStringsDecoder
-    attr_reader :language, :strings, :translations, :languages
+    attr_reader :language, :strings, :translations, :languages, :extraction_states
 
     def initialize(file_path)
       @file_path = file_path
@@ -13,6 +13,7 @@ module LocoStrings
       @translations = {}
       @languages = []
       @language = nil
+      @extraction_states = {}
     end
 
     def decode
@@ -44,6 +45,7 @@ module LocoStrings
       strings = json["strings"]
       strings.each do |key, value|
         translatable = value.fetch("shouldTranslate", true)
+        @extraction_states[key] = value["extractionState"] if value.key?("extractionState")
         val = decode_string(key, value, @language)
         @strings[key] = val if val
         @strings[key] = LocoString.new(key, key, value["comment"], "new") if val.nil?
